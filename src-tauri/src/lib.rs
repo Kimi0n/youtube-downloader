@@ -3,6 +3,7 @@ use tauri_plugin_shell::process::CommandEvent;
 use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
+use tauri::Emitter;
 
 #[tauri::command]
 async fn download_from_youtube(app: tauri::AppHandle, youtube_id: String) {
@@ -45,7 +46,8 @@ async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
                     println!("STDERR:: {}", line);
                 },
                 CommandEvent::Terminated(payload) => {
-                    println!("{:#?}", payload.code);
+                    app.emit("yt-dlp-finished", payload.code).unwrap();
+                    //println!("{:#?}", payload.code);
                     break;
                 },
                 _ => {}

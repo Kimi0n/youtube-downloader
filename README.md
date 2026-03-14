@@ -28,8 +28,8 @@ npm run tauri build
 
 # Features i want to implement for v1.0
 
-- Check if link supplied is valid and only enable button if yes
-- Progressbar or loading circle
+- Block download button when downloading
+- Loading curcle with %, filesize and speed
 - Allow user to specify a timestamp
 - Download audio only
 - Allow user to select a folder to save to

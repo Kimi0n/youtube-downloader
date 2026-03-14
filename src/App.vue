@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import './assets/style.css'
 
 const youtubeLink = ref<string>('');
@@ -9,12 +10,13 @@ const statusMessage = ref<string>('');
 
 async function prepareForDownloading() {
   try {
+    statusMessage.value = `Downloading...`;
     await invoke('download_from_youtube', { 
       youtubeId: youtubeID.value
     });
 
   } catch (error) {
-    statusMessage.value = "Error: " + error;
+    statusMessage.value = `Error: ${error}`;
   }
 }
 
@@ -37,6 +39,14 @@ async function checkLinkValidity() {
     statusMessage.value = `Invalid link!`;
   }
 }
+
+listen('yt-dlp-finished', (event) => {
+  const conversionEndCode = event.payload; 
+
+  if(conversionEndCode == 0) {
+    statusMessage.value = `Video downloaded!`;
+  }
+});
 </script>
 
 <template>
