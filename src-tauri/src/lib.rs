@@ -56,6 +56,7 @@ async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
     let ytdlp_args = vec![
         "--newline",
         "-o", "downloads/%(title)s.%(ext)s",
+        "-t", "mp4",
         youtube_id
     ];
 
