@@ -41,6 +41,10 @@ async function checkLinkValidity() {
   }
 }
 
+listen('yt-dlp-progress', (event) => {
+  statusMessage.value = `${event.payload}`;
+});
+
 listen('yt-dlp-finished', (event) => {
   const conversionEndCode = event.payload; 
 

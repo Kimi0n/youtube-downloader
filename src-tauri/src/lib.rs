@@ -5,9 +5,51 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use tauri::Emitter;
 
+struct DownloadMetadata {
+    download_percentage: String,
+    file_size: String,
+    download_speed: String, 
+    eta: String
+}
+
+impl DownloadMetadata {
+    fn is_unknown(&self) -> bool {
+        let mut unknown = false;
+
+        if self.download_percentage == "Unknown" {
+            unknown = true;
+        }
+
+        if self.file_size == "Unknown" {
+            unknown = true;
+        }
+
+        if self.download_speed == "Unknown" {
+            unknown = true;
+        }
+
+        if self.eta == "Unknown" {
+            unknown = true;
+        }
+
+        return unknown
+    }
+}
+
 #[tauri::command]
 async fn download_from_youtube(app: tauri::AppHandle, youtube_id: String) {
     call_ytdlp_for_download(app, &youtube_id).await;
+}
+
+fn extract_download_metadata(line: &str) -> DownloadMetadata {
+    let parts: Vec<&str> = line.split_whitespace().collect();
+    // println!("{:?}", parts);
+
+    if parts.len() < 8 {
+        return DownloadMetadata { download_percentage: "Unknown".to_string(), file_size: "Unknown".to_string(), download_speed: "Unknown".to_string(), eta: "Unknown".to_string() }
+    }
+
+    return DownloadMetadata { download_percentage: parts[1].to_string(), file_size: parts[3].to_string(), download_speed: parts[5].to_string(), eta: parts[7].to_string() }
 }
 
 async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
@@ -38,7 +80,17 @@ async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
                 CommandEvent::Stdout(line_bytes) => { // Not used
                     let line = String::from_utf8_lossy(&line_bytes);
                     let _ = write_to_file(log_file_path, &line);
-                    println!("STDOUT:: {}", line);
+
+                    if line.contains("[download]") {
+                        let current_metadata: DownloadMetadata = extract_download_metadata(&line);
+                        // println!("{} {} {} {}", current_metadata.download_percentage, current_metadata.file_size, current_metadata.download_speed, current_metadata.eta);
+
+                        if !current_metadata.is_unknown() {
+                            app.emit("yt-dlp-progress", format!("Progress: {} - Size: {} - Speed: {} - ETA: {}", current_metadata.download_percentage, current_metadata.file_size, current_metadata.download_speed, current_metadata.eta)).unwrap();
+                        }
+                    }
+                    
+                    // println!("STDOUT:: {}", line);
                 },
                 CommandEvent::Stderr(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
