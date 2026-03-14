@@ -29,7 +29,8 @@ npm run tauri build
 # Features i want to implement for v1.0
 
 - Block download button when downloading
-- Loading circle with %, filesize and speed
+- Loading circle with %, filesize, speed and ETA
 - Allow user to specify a timestamp
 - Download audio only
 - Allow user to select a folder to save to
+- Abort button

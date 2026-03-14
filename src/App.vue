@@ -11,6 +11,7 @@ const statusMessage = ref<string>('');
 async function prepareForDownloading() {
   try {
     statusMessage.value = `Downloading...`;
+
     await invoke('download_from_youtube', { 
       youtubeId: youtubeID.value
     });
