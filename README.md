@@ -33,6 +33,7 @@ npm run tauri build
 - Use --progress-template json
 - Improve progress indicator
 - Allow user to specify a timestamp
+- Quality selector
 - Download audio only
 - Allow user to select a folder to save to
 - Abort button
