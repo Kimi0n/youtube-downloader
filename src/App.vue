@@ -4,16 +4,37 @@ import { invoke } from '@tauri-apps/api/core';
 import './assets/style.css'
 
 const youtubeLink = ref<string>('');
+const youtubeID = ref<string>('');
 const statusMessage = ref<string>('');
 
 async function prepareForDownloading() {
   try {
     await invoke('download_from_youtube', { 
-      youtubeLink: youtubeLink.value
+      youtubeId: youtubeID.value
     });
 
   } catch (error) {
     statusMessage.value = "Error: " + error;
+  }
+}
+
+async function checkLinkValidity() {
+  const regex = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))((\w|-){11})(?:\S+)?$/;
+
+  if(youtubeLink.value == ``) {
+    youtubeID.value = ``;
+    statusMessage.value = ``;
+    return;
+  }
+
+  const matches = youtubeLink.value.match(regex);
+
+  if(matches) {
+    youtubeID.value = matches[1];
+    statusMessage.value = ``;
+  } else {
+    youtubeID.value = ``;
+    statusMessage.value = `Invalid link!`;
   }
 }
 </script>
@@ -22,8 +43,8 @@ async function prepareForDownloading() {
   <main class="container">
     <p>{{ statusMessage }}</p>
     <div>
-      <input v-model="youtubeLink" placeholder="Enter a Youtube link..." />
-      <button type="submit" @click="prepareForDownloading">Download</button>
+      <input v-model="youtubeLink" @input="checkLinkValidity" placeholder="Enter a Youtube link..." />
+      <button :disabled="!youtubeID" type="submit" @click="prepareForDownloading">Download</button>
     </div>
   </main>
 </template>

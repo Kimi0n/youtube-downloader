@@ -5,19 +5,15 @@ use std::fs::OpenOptions;
 use std::io::Write;
 
 #[tauri::command]
-async fn download_from_youtube(app: tauri::AppHandle, youtube_link: String) {
-    let video_identifier = extract_video_identifier(&youtube_link);
-    call_ytdlp_for_download(app, video_identifier).await;
+async fn download_from_youtube(app: tauri::AppHandle, youtube_id: String) {
+    call_ytdlp_for_download(app, &youtube_id).await;
 }
 
-fn extract_video_identifier(youtube_link: &str) -> &str {
-    youtube_link.split("v=").last().expect("Youtube link invalid").trim()
-}
-
-async fn call_ytdlp_for_download(app: tauri::AppHandle, video_identifier: &str) {
+async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
     let ytdlp_args = vec![
         "--newline",
-        video_identifier
+        "-o", "downloads/%(title)s.%(ext)s",
+        youtube_id
     ];
 
     let log_file_path = "output.log";
