@@ -7,10 +7,12 @@ import './assets/style.css'
 const youtubeLink = ref<string>('');
 const youtubeID = ref<string>('');
 const statusMessage = ref<string>('');
+const isReady = ref<boolean>(false);
 
 async function prepareForDownloading() {
   try {
     statusMessage.value = `Downloading...`;
+    isReady.value = false;
 
     await invoke('download_from_youtube', { 
       youtubeId: youtubeID.value
@@ -18,6 +20,7 @@ async function prepareForDownloading() {
 
   } catch (error) {
     statusMessage.value = `Error: ${error}`;
+    if( youtubeID.value != `` ) { isReady.value = true; }
   }
 }
 
@@ -27,6 +30,7 @@ async function checkLinkValidity() {
   if(youtubeLink.value == ``) {
     youtubeID.value = ``;
     statusMessage.value = ``;
+    isReady.value = false;
     return;
   }
 
@@ -35,9 +39,11 @@ async function checkLinkValidity() {
   if(matches) {
     youtubeID.value = matches[1];
     statusMessage.value = ``;
+    isReady.value = true;
   } else {
     youtubeID.value = ``;
     statusMessage.value = `Invalid link!`;
+    isReady.value = false;
   }
 }
 
@@ -51,6 +57,8 @@ listen('yt-dlp-finished', (event) => {
   if(conversionEndCode == 0) {
     statusMessage.value = `Video downloaded!`;
   }
+
+  if( youtubeID.value != `` ) { isReady.value = true; }
 });
 </script>
 
@@ -59,7 +67,7 @@ listen('yt-dlp-finished', (event) => {
     <p>{{ statusMessage }}</p>
     <div>
       <input v-model="youtubeLink" @input="checkLinkValidity" placeholder="Enter a Youtube link..." />
-      <button :disabled="!youtubeID" type="submit" @click="prepareForDownloading">Download</button>
+      <button :disabled="!isReady" type="submit" @click="prepareForDownloading">Download</button>
     </div>
   </main>
 </template>
