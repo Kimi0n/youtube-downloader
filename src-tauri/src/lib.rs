@@ -55,7 +55,6 @@ async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
         "--js-runtimes", &js_arg,
         "--progress-template", "download:{\"download_percentage\":\"%(progress._percent_str)s\",\"download_speed\":\"%(progress._speed_str)s\",\"eta\":\"%(progress._eta_str)s\"}",
         "-o", "downloads/%(title)s.%(ext)s",
-        "-t", "mp4",
         youtube_id
     ];
 
