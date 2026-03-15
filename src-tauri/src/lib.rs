@@ -4,10 +4,11 @@ use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use tauri::Emitter;
+use serde_json::{Value};
 
+#[derive(serde::Deserialize, Debug)]
 struct DownloadMetadata {
     download_percentage: String,
-    file_size: String,
     download_speed: String, 
     eta: String
 }
@@ -20,11 +21,7 @@ impl DownloadMetadata {
             unknown = true;
         }
 
-        if self.file_size == "Unknown" {
-            unknown = true;
-        }
-
-        if self.download_speed == "Unknown" {
+        if self.download_speed == "Unknown B/s" {
             unknown = true;
         }
 
@@ -41,20 +38,25 @@ async fn download_from_youtube(app: tauri::AppHandle, youtube_id: String) {
     call_ytdlp_for_download(app, &youtube_id).await;
 }
 
-fn extract_download_metadata(line: &str) -> DownloadMetadata {
+fn is_json(data: &str) -> bool {
+    serde_json::from_str::<Value>(data).is_ok()
+}
+
+/* fn extract_download_metadata(line: &str) -> DownloadMetadata {
     let parts: Vec<&str> = line.split_whitespace().collect();
     // println!("{:?}", parts);
 
     if parts.len() < 8 {
-        return DownloadMetadata { download_percentage: "Unknown".to_string(), file_size: "Unknown".to_string(), download_speed: "Unknown".to_string(), eta: "Unknown".to_string() }
+        return DownloadMetadata { download_percentage: "Unknown".to_string(), download_speed: "Unknown".to_string(), eta: "Unknown".to_string() }
     }
 
-    return DownloadMetadata { download_percentage: parts[1].to_string(), file_size: parts[3].to_string(), download_speed: parts[5].to_string(), eta: parts[7].to_string() }
-}
+    return DownloadMetadata { download_percentage: parts[1].to_string(), download_speed: parts[5].to_string(), eta: parts[7].to_string() }
+} */
 
 async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
     let ytdlp_args = vec![
         "--newline",
+        "--progress-template", "download:{\"download_percentage\":\"%(progress._percent_str)s\",\"download_speed\":\"%(progress._speed_str)s\",\"eta\":\"%(progress._eta_str)s\"}",
         "-o", "downloads/%(title)s.%(ext)s",
         "-t", "mp4",
         youtube_id
@@ -82,14 +84,22 @@ async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
                     let line = String::from_utf8_lossy(&line_bytes);
                     let _ = write_to_file(log_file_path, &line);
 
-                    if line.contains("[download]") {
+                    if is_json(&line) {
+                        let current_metadata: DownloadMetadata = serde_json::from_str(&line).expect("Invalid JSON");
+                        // println!("{} {} {}", current_metadata.download_percentage, current_metadata.download_speed, current_metadata.eta);
+
+                        if !current_metadata.is_unknown() {
+                            app.emit("yt-dlp-progress", format!("Progress: {} - Speed: {} - ETA: {}", current_metadata.download_percentage, current_metadata.download_speed, current_metadata.eta)).unwrap();
+                        }
+                    }
+                    /* if line.contains("[download]") {
                         let current_metadata: DownloadMetadata = extract_download_metadata(&line);
                         // println!("{} {} {} {}", current_metadata.download_percentage, current_metadata.file_size, current_metadata.download_speed, current_metadata.eta);
 
                         if !current_metadata.is_unknown() {
-                            app.emit("yt-dlp-progress", format!("Progress: {} - Size: {} - Speed: {} - ETA: {}", current_metadata.download_percentage, current_metadata.file_size, current_metadata.download_speed, current_metadata.eta)).unwrap();
+                            app.emit("yt-dlp-progress", format!("Progress: {} - Speed: {} - ETA: {}", current_metadata.download_percentage, current_metadata.download_speed, current_metadata.eta)).unwrap();
                         }
-                    }
+                    }*/
                     
                     // println!("STDOUT:: {}", line);
                 },

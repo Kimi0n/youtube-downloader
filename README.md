@@ -28,11 +28,12 @@ npm run tauri build
 
 # Features i want to implement for v1.0
 
+- Add EJS
 - Add ffmpeg for 4k
-- Use --progress-template json
 - Improve progress indicator
 - Allow user to specify a timestamp
 - Quality selector
 - Download audio only
 - Allow user to select a folder to save to
 - Abort button
+- Youtube cookies import for locked content
