@@ -1,6 +1,8 @@
 # Youtube Downloader
 
-A Youtube video downloader for Windows. Uses yt-dlp and deno.
+![Preview image of the app](src/assets/app_preview.png "Preview Image")
+
+A simple Youtube video downloader based on yt-dlp for Windows.
 
 # Download
 
@@ -10,9 +12,9 @@ Go to [this link](https://github.com/Kimi0n/youtube-downloader/releases) and dow
 
 1. Pull the repository.
 2. Ensure Rust and npm are installed on your device.
-3. Download and add [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [deno](https://github.com/denoland/deno) to `src-tauri/bin` and rename it to:
+3. Download and add [yt-dlp](https://github.com/yt-dlp/yt-dlp), [deno](https://github.com/denoland/deno) and an ffmpeg binary to `src-tauri/bin` and rename it to:
 
-`yt-dlp-x86_64-pc-windows-msvc.exe` `deno-x86_64-pc-windows-msvc.exe`
+`yt-dlp-x86_64-pc-windows-msvc.exe` `deno-x86_64-pc-windows-msvc.exe` `ffmpeg-x86_64-pc-windows-msvc.exe`
 
 ## Start dev server
 
