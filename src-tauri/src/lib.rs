@@ -5,6 +5,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use tauri::Emitter;
 use serde_json::{Value};
+use tauri::{Manager, path::BaseDirectory};
 
 #[derive(serde::Deserialize, Debug)]
 struct DownloadMetadata {
@@ -42,20 +43,16 @@ fn is_json(data: &str) -> bool {
     serde_json::from_str::<Value>(data).is_ok()
 }
 
-/* fn extract_download_metadata(line: &str) -> DownloadMetadata {
-    let parts: Vec<&str> = line.split_whitespace().collect();
-    // println!("{:?}", parts);
-
-    if parts.len() < 8 {
-        return DownloadMetadata { download_percentage: "Unknown".to_string(), download_speed: "Unknown".to_string(), eta: "Unknown".to_string() }
-    }
-
-    return DownloadMetadata { download_percentage: parts[1].to_string(), download_speed: parts[5].to_string(), eta: parts[7].to_string() }
-} */
-
 async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
+    let deno_path = app
+        .path()
+        .resolve("deno", BaseDirectory::Resource)
+        .expect("failed to resolve deno path");
+
+    let js_arg = format!("deno:{}", deno_path.to_string_lossy().to_string());
     let ytdlp_args = vec![
         "--newline",
+        "--js-runtimes", &js_arg,
         "--progress-template", "download:{\"download_percentage\":\"%(progress._percent_str)s\",\"download_speed\":\"%(progress._speed_str)s\",\"eta\":\"%(progress._eta_str)s\"}",
         "-o", "downloads/%(title)s.%(ext)s",
         "-t", "mp4",
@@ -92,15 +89,6 @@ async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
                             app.emit("yt-dlp-progress", format!("Progress: {} - Speed: {} - ETA: {}", current_metadata.download_percentage, current_metadata.download_speed, current_metadata.eta)).unwrap();
                         }
                     }
-                    /* if line.contains("[download]") {
-                        let current_metadata: DownloadMetadata = extract_download_metadata(&line);
-                        // println!("{} {} {} {}", current_metadata.download_percentage, current_metadata.file_size, current_metadata.download_speed, current_metadata.eta);
-
-                        if !current_metadata.is_unknown() {
-                            app.emit("yt-dlp-progress", format!("Progress: {} - Speed: {} - ETA: {}", current_metadata.download_percentage, current_metadata.download_speed, current_metadata.eta)).unwrap();
-                        }
-                    }*/
-                    
                     // println!("STDOUT:: {}", line);
                 },
                 CommandEvent::Stderr(line_bytes) => {

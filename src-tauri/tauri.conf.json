@@ -32,7 +32,8 @@
       "icons/icon.ico"
     ],
     "externalBin": [
-      "bin/yt-dlp"
+      "bin/yt-dlp",
+      "bin/deno"
     ]
   }
 }
