@@ -29,7 +29,6 @@ npm run tauri build
 # Features i want to implement for v1.0
 
 - Add ffmpeg for 4k
-- Download in different format
 - Use --progress-template json
 - Improve progress indicator
 - Allow user to specify a timestamp

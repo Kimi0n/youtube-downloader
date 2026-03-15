@@ -64,7 +64,7 @@ listen('yt-dlp-finished', (event) => {
 
 <template>
   <main class="container">
-    <p>{{ statusMessage }}</p>
+    <p>{{ statusMessage || '&nbsp;' }}</p>
     <div>
       <input v-model="youtubeLink" @input="checkLinkValidity" placeholder="Enter a Youtube link..." />
       <button :disabled="!isReady" type="submit" @click="prepareForDownloading">Download</button>
