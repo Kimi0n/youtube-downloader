@@ -33,7 +33,6 @@ npm run tauri build
 - Improve progress indicator
 - Allow user to specify a timestamp
 - Quality selector
-- Download audio only
 - Allow user to select a folder to save to
 - Abort button
 - Youtube cookies import for locked content

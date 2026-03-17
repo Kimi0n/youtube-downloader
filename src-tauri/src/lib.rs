@@ -35,28 +35,35 @@ impl DownloadMetadata {
 }
 
 #[tauri::command]
-async fn download_from_youtube(app: tauri::AppHandle, youtube_id: String) {
-    call_ytdlp_for_download(app, &youtube_id).await;
+async fn download_from_youtube(app: tauri::AppHandle, youtube_id: String, is_audio_only: bool) {
+    call_ytdlp_for_download(app, &youtube_id, is_audio_only).await;
 }
 
 fn is_json(data: &str) -> bool {
     serde_json::from_str::<Value>(data).is_ok()
 }
 
-async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str) {
+async fn call_ytdlp_for_download(app: tauri::AppHandle, youtube_id: &str, is_audio_only: bool) {
     let deno_path = app
         .path()
         .resolve("deno", BaseDirectory::Resource)
         .expect("failed to resolve deno path");
 
     let js_arg = format!("deno:{}", deno_path.to_string_lossy().to_string());
-    let ytdlp_args = vec![
+    let mut ytdlp_args = vec![
         "--newline",
         "--js-runtimes", &js_arg,
         "--progress-template", "download:{\"download_percentage\":\"%(progress._percent_str)s\",\"download_speed\":\"%(progress._speed_str)s\",\"eta\":\"%(progress._eta_str)s\"}",
-        "-o", "downloads/%(title)s.%(ext)s",
-        youtube_id
+        "-o", "downloads/%(title)s.%(ext)s"
     ];
+
+    if is_audio_only {
+        ytdlp_args.push("-x");
+    }
+
+    ytdlp_args.extend([
+        youtube_id
+    ]);
 
     let log_file_path = "output.log";
     let _write_result = fs::write(log_file_path, "Logs from: call_ytdlp_for_download\r\n");

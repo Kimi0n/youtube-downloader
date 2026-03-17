@@ -8,6 +8,7 @@ const youtubeLink = ref<string>('');
 const youtubeID = ref<string>('');
 const statusMessage = ref<string>('');
 const isReady = ref<boolean>(false);
+const isAudioOnly = ref<boolean>(false);
 
 async function prepareForDownloading() {
   try {
@@ -15,7 +16,8 @@ async function prepareForDownloading() {
     isReady.value = false;
 
     await invoke('download_from_youtube', { 
-      youtubeId: youtubeID.value
+      youtubeId: youtubeID.value,
+      isAudioOnly: isAudioOnly.value
     });
 
   } catch (error) {
@@ -55,7 +57,7 @@ listen('yt-dlp-finished', (event) => {
   const conversionEndCode = event.payload; 
 
   if(conversionEndCode == 0) {
-    statusMessage.value = `Video downloaded!`;
+    statusMessage.value = `Finished downloading!`;
   }
 
   if( youtubeID.value != `` ) { isReady.value = true; }
@@ -69,5 +71,7 @@ listen('yt-dlp-finished', (event) => {
       <input v-model="youtubeLink" @input="checkLinkValidity" placeholder="Enter a Youtube link..." />
       <button :disabled="!isReady" type="submit" @click="prepareForDownloading">Download</button>
     </div>
+    Audio only:
+    <input type="checkbox" v-model="isAudioOnly">
   </main>
 </template>
