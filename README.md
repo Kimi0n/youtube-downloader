@@ -30,9 +30,15 @@ npm run tauri build
 
 # Features i want to implement for v1.0
 
+- Add sidecar management to make sure that all sidecars are closed when the app is closed
 - Improve progress indicator
 - Allow user to specify a timestamp
 - Quality selector
 - Allow user to select a folder to save to
 - Abort button
 - Youtube cookies import for locked content
+
+# Changelog
+
+### 0.5.1
+- Updated the deno and yt-dlp binaries
